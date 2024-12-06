@@ -18,12 +18,20 @@ class WeatherLookUpController extends Controller
     }
 
     //
+
+    /**
+     * @return JsonResponse
+     */
     public function index(): JsonResponse
     {
         return $this->sendResponse('This is index',[],200);
     }
 
-    public function lookUp(Request $request)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function lookUp(Request $request): JsonResponse
     {
         $weatherUpdate = $this->weatherApi->makeRequest($request->city);
 
@@ -35,6 +43,12 @@ class WeatherLookUpController extends Controller
         return $this->sendResponse('success',$data,200);
     }
 
+    /**
+     * @param string $message
+     * @param array $data
+     * @param int $statusCode
+     * @return JsonResponse
+     */
     protected function sendResponse(string $message, array $data = [], int $statusCode = 200): JsonResponse
     {
         return response()->json([
