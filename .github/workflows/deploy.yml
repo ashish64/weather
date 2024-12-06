@@ -38,9 +38,7 @@ jobs:
       - name: Migrate
         env:
           DB_CONNECTION: sqlite
-          DB_CONNECTION_LOG: sqlite
           DB_DATABASE: database/database.sqlite
-          DB_LOG_DATABASE: database/database.sqlite
         run: php artisan migrate
 
       - name: Clear Cache
@@ -49,9 +47,7 @@ jobs:
       - name: Run tests
         env:
           DB_CONNECTION: sqlite
-          DB_CONNECTION_LOG: sqlite
           DB_DATABASE: database/database.sqlite
-          DB_LOG_DATABASE: database/database.sqlite
         run: php artisan test
 
   deploy:
