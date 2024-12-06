@@ -5,19 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
-use App\Services\WeatherApi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class WeatherLookUpController extends Controller
 {
-    protected object $weatherApi;
-    public function __construct( WeatherApi $weatherApi)
-    {
-        $this->weatherApi = $weatherApi;
-    }
-
     //
+
 
     /**
      * @return JsonResponse
@@ -26,6 +20,7 @@ class WeatherLookUpController extends Controller
     {
         return $this->sendResponse('This is index',[],200);
     }
+
 
     /**
      * @param Request $request
