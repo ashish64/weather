@@ -11,12 +11,12 @@ use Illuminate\Http\Request;
 class WeatherLookUpController extends Controller
 {
     //
-    public function index()
+    public function index(): JsonResponse
     {
-        return $this->sendResponse('This is index',[],200);
+        return $this->sendResponse('This is index',,200);
     }
 
-    protected function sendResponse($message, $data = [], $statusCode = 200): JsonResponse
+    protected function sendResponse(string $message, array $data = [], int $statusCode = 200): JsonResponse
     {
         return response()->json([
             'data' => $data,
