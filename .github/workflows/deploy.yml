@@ -89,7 +89,7 @@ jobs:
       - name: Clear Cache
         run: php artisan optimize:clear
 
-      - name: Run tests
+      - name: Run analyse
         env:
           DB_CONNECTION: sqlite
           DB_DATABASE: database/database.sqlite
