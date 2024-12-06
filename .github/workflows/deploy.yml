@@ -38,8 +38,16 @@ jobs:
       - name: Migrate
         env:
           DB_CONNECTION: sqlite
+          DB_CONNECTION_LOG: sqlite
           DB_DATABASE: database/database.sqlite
+          DB_LOG_DATABASE: database/database.sqlite
         run: php artisan migrate
+
+      - name: Passport Install
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan passport:install
 
       - name: Clear Cache
         run: php artisan optimize:clear
@@ -47,10 +55,13 @@ jobs:
       - name: Run tests
         env:
           DB_CONNECTION: sqlite
+          DB_CONNECTION_LOG: sqlite
           DB_DATABASE: database/database.sqlite
+          DB_LOG_DATABASE: database/database.sqlite
         run: php artisan test
 
-  build-and-larastan:
+  deploy:
+    needs: build-and-test
     runs-on: ubuntu-latest
 
     steps:
@@ -62,35 +73,38 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
-
-      - name: Copy .env
-        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+          php-version: 8.2
 
       - name: Install Dependencies
         run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --ignore-platform-req=ext-imagick
-
-      - name: Generate key
-        run: php artisan key:generate
-
       - name: Directory Permissions
-        run: chmod -R 777 storage bootstrap/cache
+        run: chmod -R 777 storage bootstrap/cache deploy
 
-      - name: Create Database
-        run: |
-          mkdir -p database
-          touch database/database.sqlite
-      - name: Migrate
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: database/database.sqlite
-        run: php artisan migrate
+      - name: Pre Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          username: ${{ secrets.DEV_REMOTE_USER }}
+          host: ${{ secrets.DEV_REMOTE_HOST }}
+          key: ${{ secrets.DEV_SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.DEV_REMOTE_TARGET }} && php artisan down
 
-      - name: Clear Cache
-        run: php artisan optimize:clear
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@main
+        with:
+          SSH_PRIVATE_KEY: ${{ secrets.DEV_SSH_PRIVATE_KEY }}
+          ARGS: "-rlgoDzvc -i --delete"
+          SOURCE: "/"
+          REMOTE_HOST: ${{ secrets.DEV_REMOTE_HOST }}
+          REMOTE_USER: ${{ secrets.DEV_REMOTE_USER }}
+          TARGET: ${{ secrets.DEV_REMOTE_TARGET }}
+          EXCLUDE: "/storage/, /bootstrap/, .env"
 
-      - name: Run tests
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: database/database.sqlite
-        run: ./vendor/bin/phpstan analyse
+      - name: Post Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          username: ${{ secrets.DEV_REMOTE_USER }}
+          host: ${{ secrets.DEV_REMOTE_HOST }}
+          key: ${{ secrets.DEV_SSH_PRIVATE_KEY }}
+          script: |
+            cd ${{ secrets.DEV_REMOTE_TARGET }} && ./deploy/after.sh
