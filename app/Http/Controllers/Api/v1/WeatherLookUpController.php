@@ -13,7 +13,7 @@ class WeatherLookUpController extends Controller
     //
     public function index(): JsonResponse
     {
-        return $this->sendResponse('This is index',,200);
+        return $this->sendResponse('This is index',[],200);
     }
 
     protected function sendResponse(string $message, array $data = [], int $statusCode = 200): JsonResponse
