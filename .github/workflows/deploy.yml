@@ -43,12 +43,6 @@ jobs:
           DB_LOG_DATABASE: database/database.sqlite
         run: php artisan migrate
 
-      - name: Passport Install
-        env:
-          DB_CONNECTION: sqlite
-          DB_DATABASE: database/database.sqlite
-        run: php artisan passport:install
-
       - name: Clear Cache
         run: php artisan optimize:clear
 
