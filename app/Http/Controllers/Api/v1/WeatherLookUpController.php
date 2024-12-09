@@ -11,12 +11,40 @@ use Illuminate\Http\Request;
 class WeatherLookUpController extends Controller
 {
     //
-    public function index()
+
+
+    /**
+     * @return JsonResponse
+     */
+    public function index(): JsonResponse
     {
         return $this->sendResponse('This is index',[],200);
     }
 
-    protected function sendResponse($message, $data = [], $statusCode = 200): JsonResponse
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function lookUp(Request $request): JsonResponse
+    {
+        $weatherUpdate = $this->weatherApi->makeRequest($request->city);
+
+        $data = [
+            'city' => $weatherUpdate['location']['name'],
+            'temperature' => $weatherUpdate['current']['temp_c'].' °C',
+        ];
+
+        return $this->sendResponse('success',$data,200);
+    }
+
+    /**
+     * @param string $message
+     * @param array $data
+     * @param int $statusCode
+     * @return JsonResponse
+     */
+    protected function sendResponse(string $message, array $data = [], int $statusCode = 200): JsonResponse
     {
         return response()->json([
             'data' => $data,
